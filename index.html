@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DASH Over 50 METHOD™</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    brandPrimary: '#1B847C',
+                    brandPrimaryDark: '#0F3E35',
+                    brandPrimaryTint: '#E6F4F1',
+                    brandAccent: '#9FD7C5',
+                    creamBg: '#F7F3E9',
+                    surface: '#FFFFFF',
+                    border: '#E5E7EB',
+                    textPrimary: '#0F172A',
+                    textSecondary: '#475569',
+                    textMuted: '#64748B',
+                    textOnDark: '#FFFFFF',
+                    shadowSoft: 'rgba(0,0,0,0.08)',
+                    accentBlue: '#0EA5E9',
+                    danger: '#B91C1C',
+                    warning: '#F59E0B',
+                    success: '#16A34A',
+                }
+            }
+        }
+      }
+    </script>
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1B847C" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="DASH Coach" />
+    <link rel="apple-touch-icon" href="https://i.imgur.com/vZhVvfY.png" />
+    <style>
+      body {
+        overscroll-behavior-y: contain;
+      }
+      @keyframes fade-in-out {
+        0% { opacity: 0; transform: translateY(10px); }
+        15% { opacity: 1; transform: translateY(0); }
+        85% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(10px); }
+      }
+      .animate-fade-in-out {
+        animation: fade-in-out 2s ease-in-out forwards;
+      }
+      
+      /* Micro-interactions */
+      @keyframes pulse-once {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      .animate-pulse-once {
+        animation: pulse-once 0.4s ease-in-out;
+      }
+      @keyframes fade-in {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        animation: fade-in 0.3s ease-out forwards;
+      }
+      /* Add this to make the active:scale effect smooth */
+      button, a {
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 150ms;
+        touch-action: manipulation; /* Improves touch responsiveness */
+      }
+
+
+       /* Font Scaling */
+      .font-sm { font-size: 14px; }
+      .font-lg { font-size: 18px; }
+
+      /* Reduce Motion */
+      .reduce-motion * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .reduce-motion .animate-fade-in-out, .reduce-motion .animate-pulse, .reduce-motion .animate-fade-in, .reduce-motion .animate-pulse-once {
+        animation: none !important;
+      }
+
+      /* High Contrast Theme */
+      .high-contrast {
+        --hc-bg: #000 !important;
+        --hc-text: #FFF !important;
+        --hc-border: #FFF !important;
+        --hc-primary-bg: #FFFF00 !important; /* Yellow */
+        --hc-primary-text: #000 !important;
+        --hc-secondary-text: #00FFFF !important; /* Cyan */
+      }
+      .high-contrast body, .high-contrast [class*="bg-"] {
+          background-color: var(--hc-bg) !important;
+          color: var(--hc-text) !important;
+      }
+      .high-contrast *, .high-contrast [class*="border-"] {
+          border-color: var(--hc-border) !important;
+      }
+       .high-contrast [class*="text-"] {
+          color: var(--hc-text) !important;
+       }
+       .high-contrast a, .high-contrast .text-sky-600 {
+           color: var(--hc-secondary-text) !important;
+           text-decoration: underline !important;
+       }
+       .high-contrast .bg-teal-700, .high-contrast .bg-green-600 {
+           background-color: var(--hc-primary-bg) !important;
+           color: var(--hc-primary-text) !important;
+           border: 2px solid var(--hc-border) !important;
+       }
+       .high-contrast .text-white {
+           color: var(--hc-primary-text) !important;
+       }
+        .high-contrast .text-teal-700 {
+           color: var(--hc-primary-bg) !important;
+        }
+       .high-contrast .bg-red-700, .high-contrast .bg-red-100 { 
+           background-color: #E74C3C !important; color: #fff !important; border: 1px solid white !important;
+       }
+        .high-contrast .bg-amber-50, .high-contrast .bg-amber-100 {
+           border: 1px dashed #FFC300 !important;
+        }
+       .high-contrast .text-amber-700, .high-contrast .text-amber-800 {
+           color: #FFC300 !important;
+       }
+    </style>
+    <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/client": "https://aistudiocdn.com/react-dom@^19.2.0/client",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
