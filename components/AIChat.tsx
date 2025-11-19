@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { getLocalStorageItem, markdownToHtml } from './utils';
@@ -194,7 +195,15 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
 
         const personalizedSystemPrompt = AI_COACH_SYSTEM_PROMPT + contextString;
 
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        // SAFEGUARD: Ensure process.env exists before accessing. 
+        // In strictly blocked environments, process might be undefined.
+        const apiKey = typeof process !== 'undefined' && process.env ? process.env.API_KEY : '';
+        
+        if (!apiKey) {
+             throw new Error("API Key is missing or process.env is undefined.");
+        }
+
+        const ai = new GoogleGenAI({ apiKey });
         let response: GenerateContentResponse | undefined;
         const modelsToTry = ['gemini-flash-latest', 'gemini-2.5-pro'];
 
@@ -235,6 +244,8 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
                 errorMessageText = "The AI service usage limit has been reached. Please try again later.";
             } else if (lowerCaseError.includes('model') && (lowerCaseError.includes('not found') || lowerCaseError.includes('unavailable'))) {
                  errorMessageText = "The AI model is currently unavailable. Please try again later.";
+            } else if (lowerCaseError.includes('process') || lowerCaseError.includes('api key')) {
+                 errorMessageText = "System Error: API Key configuration is missing. Please check your environment settings.";
             }
         }
         const errorMessage = { text: errorMessageText, sender: 'ai' };
