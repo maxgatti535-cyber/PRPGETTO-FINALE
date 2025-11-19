@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { getLocalStorageItem, getBPCategory } from './utils';
 
@@ -69,15 +70,15 @@ const Dashboard: React.FC<{ setScreen: (screen: string) => void }> = ({ setScree
 
     // Load and process BP data
     const savedBP = getLocalStorageItem('dash_bp_readings', []);
-    if (savedBP) {
+    if (Array.isArray(savedBP) && savedBP.length > 0) {
         const readings = savedBP;
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const recentReadings = readings.filter(r => new Date(r.date) >= sevenDaysAgo);
+        const recentReadings = readings.filter(r => r && typeof r === 'object' && r.date && new Date(r.date) >= sevenDaysAgo);
 
         if (recentReadings.length >= 3) {
-          const totalSys = recentReadings.reduce((sum, r) => sum + Number(r.systolic), 0);
-          const totalDia = recentReadings.reduce((sum, r) => sum + Number(r.diastolic), 0);
+          const totalSys = recentReadings.reduce((sum, r) => sum + (Number(r.systolic) || 0), 0);
+          const totalDia = recentReadings.reduce((sum, r) => sum + (Number(r.diastolic) || 0), 0);
           const avgSys = Math.round(totalSys / recentReadings.length);
           const avgDia = Math.round(totalDia / recentReadings.length);
           setBpData({
@@ -90,7 +91,7 @@ const Dashboard: React.FC<{ setScreen: (screen: string) => void }> = ({ setScree
     // Load medication data and compute next due
     const savedMeds = getLocalStorageItem<Medication[]>('dash_medications_v2', []);
     const savedTaken = getLocalStorageItem('dash_medsTaken_v2', {});
-    if (savedMeds.length > 0) {
+    if (Array.isArray(savedMeds) && savedMeds.length > 0) {
         const medications: Medication[] = savedMeds;
         const takenRecords = savedTaken;
         const todaysTaken = takenRecords[todayKey] || [];
@@ -112,6 +113,7 @@ const Dashboard: React.FC<{ setScreen: (screen: string) => void }> = ({ setScree
             else if (med.scheduleType === 'slots' && med.slots) times = med.slots.map(slot => (med.slotTimes?.[slot]) || SLOT_TIMES[slot]);
 
             times.forEach(time => {
+                if (!time) return;
                 const [hours, minutes] = time.split(':').map(Number);
                 const dueTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hours, minutes);
                 const wasTaken = todaysTaken.some(t => t.medId === med.id && t.time === time);
@@ -135,7 +137,7 @@ const Dashboard: React.FC<{ setScreen: (screen: string) => void }> = ({ setScree
     // Load settings summary
     const units = getLocalStorageItem('preferences.units', 'us') === 'us' ? 'US' : 'Metric';
     const exLevelRaw = getLocalStorageItem('exLevel', getLocalStorageItem('preferences.exerciseLevelDefault', 'beginner'));
-    const exerciseLevel = exLevelRaw.charAt(0).toUpperCase() + exLevelRaw.slice(1);
+    const exerciseLevel = typeof exLevelRaw === 'string' ? exLevelRaw.charAt(0).toUpperCase() + exLevelRaw.slice(1) : 'Beginner';
     const sodiumTarget = getLocalStorageItem('preferences.sodiumTargetMg', 1800);
 
     setSettingsSummary({
