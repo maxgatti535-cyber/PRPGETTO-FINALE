@@ -116,11 +116,11 @@ const Progress: React.FC = () => {
       const sevenDaysAgo = new Date(new Date().setDate(new Date().getDate() - 7));
       const fourteenDaysAgo = new Date(new Date().setDate(new Date().getDate() - 14));
 
-      const lastWeekReadings = readings.filter((r: any) => new Date(r.date) >= sevenDaysAgo);
-      const prevWeekReadings = readings.filter((r: any) => new Date(r.date) >= fourteenDaysAgo && new Date(r.date) < sevenDaysAgo);
+      const lastWeekReadings = readings.filter((r) => new Date(r.date) >= sevenDaysAgo);
+      const prevWeekReadings = readings.filter((r) => new Date(r.date) >= fourteenDaysAgo && new Date(r.date) < sevenDaysAgo);
 
-      const filterAndAverage = (readings: any[]) => {
-          const validReadings = readings.filter(r => r && typeof r.systolic === 'string' && !isNaN(Number(r.systolic)) && Number(r.systolic) > 0);
+      const filterAndAverage = (readingsSet: Reading[]) => {
+          const validReadings = readingsSet.filter(r => r && typeof r.systolic === 'string' && !isNaN(Number(r.systolic)) && Number(r.systolic) > 0);
           if (validReadings.length < 3) return null;
           const totalSys = validReadings.reduce((sum, r) => sum + Number(r.systolic), 0);
           return totalSys / validReadings.length;
