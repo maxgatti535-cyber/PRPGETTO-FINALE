@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 100%;">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DASH Over 50 METHOD™</title>
     
-    <!-- Tailwind CSS via CDN for simplicity in this setup -->
+    <!-- Tailwind CSS via CDN for rapid styling without complex build steps -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -42,7 +42,8 @@
     <link rel="apple-touch-icon" href="https://i.imgur.com/vZhVvfY.png" />
     
     <style>
-      body { overscroll-behavior-y: contain; }
+      body { overscroll-behavior-y: contain; height: 100%; margin: 0; }
+      #root { height: 100%; }
       /* Animation Utilities */
       @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
@@ -54,15 +55,15 @@
       .high-contrast { --hc-bg: #000 !important; --hc-text: #FFF !important; }
       .high-contrast body { background-color: var(--hc-bg) !important; color: var(--hc-text) !important; }
     </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
     "vite": "https://aistudiocdn.com/vite@^7.2.2",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0"
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1"
   }
 }
 </script>
@@ -74,15 +75,15 @@
       window.addEventListener('error', function(e) {
         const root = document.getElementById('root');
         if(root && (!root.innerHTML || root.innerHTML === '')) {
-           // Only show this if root is empty after a delay, implying a crash
            setTimeout(() => {
              if(!root.innerHTML) {
-                document.body.innerHTML = '<div style="padding:20px; font-family:sans-serif; color:#B91C1C"><h1>App failed to load</h1><p>Please check console for details.</p><pre>' + e.message + '</pre></div>';
+                document.body.innerHTML = '<div style="padding:20px; font-family:sans-serif; color:#B91C1C; text-align:center;"><h1>Startup Error</h1><p>The application failed to initialize.</p><p style="font-size:12px; color:#555;">' + e.message + '</p><button onclick="localStorage.clear();window.location.reload()" style="margin-top:10px;padding:10px;background:#B91C1C;color:white;border:none;border-radius:4px;">Reset App</button></div>';
              }
-           }, 1000);
+           }, 2000);
         }
       });
     </script>
     <script type="module" src="/index.tsx"></script>
   </body>
+</html>
 </html>
