@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { getLocalStorageItem } from './utils';
 
@@ -11,6 +9,23 @@ interface Reading {
     systolic: string;
     diastolic: string;
     note: string;
+}
+
+// Duplicate interface from Medications.tsx to ensure independent type safety
+interface Medication {
+  id: string;
+  startDateISO: string;
+  endDateISO?: string;
+  repeatDays: number[];
+  scheduleType: "times" | "slots";
+  times?: string[];
+  slots?: ("Morning" | "Noon" | "Evening" | "Bedtime")[];
+  slotTimes?: { [key: string]: string };
+}
+
+interface TakenRecord {
+    medId: string;
+    time: string;
 }
 
 // --- CHART COMPONENT ---
@@ -162,15 +177,16 @@ const Progress: React.FC = () => {
 
 
     // Med Adherence
-    const savedMeds = getLocalStorageItem('dash_medications_v2', []);
-    const savedTaken = getLocalStorageItem('dash_medsTaken_v2', {});
+    const savedMeds = getLocalStorageItem<Medication[]>('dash_medications_v2', []);
+    const savedTaken = getLocalStorageItem<{ [key: string]: TakenRecord[] }>('dash_medsTaken_v2', {});
+    
     if (Array.isArray(savedMeds) && savedMeds.length > 0) {
       const medications = savedMeds;
       const takenRecords = savedTaken;
       if (medications.length > 0) {
         let takenCount = 0;
         let scheduledCount = 0;
-        const SLOT_TIMES = { Morning: '08:00', Noon: '12:00', Evening: '18:00', Bedtime: '22:00' };
+        const SLOT_TIMES: { [key: string]: string } = { Morning: '08:00', Noon: '12:00', Evening: '18:00', Bedtime: '22:00' };
 
         for (let i = 0; i < 7; i++) {
           const date = new Date();
@@ -179,7 +195,7 @@ const Progress: React.FC = () => {
           const dayOfWeek = date.getDay();
           const takenOnDay = takenRecords[dayKey] || [];
 
-          medications.forEach((med: any) => {
+          medications.forEach((med) => {
             const startDate = new Date(med.startDateISO + 'T00:00:00');
             const endDate = med.endDateISO ? new Date(med.endDateISO + 'T23:59:59') : null;
             
@@ -190,12 +206,12 @@ const Progress: React.FC = () => {
             if (med.scheduleType === 'times' && med.times) {
                 times = med.times;
             } else if (med.scheduleType === 'slots' && med.slots) {
-                times = med.slots.map((slot: 'Morning'|'Noon'|'Evening'|'Bedtime') => (med.slotTimes?.[slot]) || SLOT_TIMES[slot]);
+                times = med.slots.map(slot => (med.slotTimes && med.slotTimes[slot]) ? med.slotTimes[slot] : SLOT_TIMES[slot]);
             }
             
             times.forEach(time => {
                 scheduledCount++;
-                const wasTaken = takenOnDay.some((t: any) => t.medId === med.id && t.time === time);
+                const wasTaken = takenOnDay.some(t => t.medId === med.id && t.time === time);
                 if (wasTaken) {
                     takenCount++;
                 }
@@ -288,5 +304,7 @@ const Progress: React.FC = () => {
     </div>
   );
 };
+
+export default Progress;
 
 export default Progress;
