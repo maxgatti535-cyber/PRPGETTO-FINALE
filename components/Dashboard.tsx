@@ -1,12 +1,18 @@
-
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { getLocalStorageItem, getBPCategory } from './utils';
 
 // --- Types ---
 type Unit = "mg" | "mcg" | "mL" | "tabs" | "drops" | "units";
 type Slot = "Morning" | "Noon" | "Evening" | "Bedtime";
-type Medication = {
+
+interface BPReading {
+    systolic: string | number;
+    diastolic: string | number;
+    date: string;
+    time?: string;
+}
+
+interface Medication {
   id: string;
   name: string;
   dose: number | '';
@@ -18,7 +24,17 @@ type Medication = {
   repeatDays: number[]; // 0=Sun..6=Sat
   startDateISO: string; // "YYYY-MM-DD"
   endDateISO?: string;
-};
+}
+
+interface TakenRecord {
+    medId: string;
+    time: string;
+}
+
+interface TakenRecordsMap {
+    [dateKey: string]: TakenRecord[];
+}
+
 const SLOT_TIMES: { [key in Slot]: string } = {
   Morning: '08:00',
   Noon: '12:00',
@@ -69,13 +85,18 @@ const Dashboard: React.FC<{ setScreen: (screen: string) => void }> = ({ setScree
     // Load water data for today
     setWaterCount(getLocalStorageItem(`water:${todayKey}`, 0));
 
-    // Load and process BP data
-    const savedBP = getLocalStorageItem('dash_bp_readings', []);
+    // Load and process BP data with explicit typing
+    const savedBP = getLocalStorageItem<BPReading[]>('dash_bp_readings', []);
     if (Array.isArray(savedBP) && savedBP.length > 0) {
-        const readings = savedBP;
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-        const recentReadings = readings.filter(r => r && typeof r === 'object' && r.date && new Date(r.date) >= sevenDaysAgo);
+        
+        const recentReadings = savedBP.filter(r => 
+            r && 
+            typeof r === 'object' && 
+            r.date && 
+            new Date(r.date) >= sevenDaysAgo
+        );
 
         if (recentReadings.length >= 3) {
           const totalSys = recentReadings.reduce((sum, r) => sum + (Number(r.systolic) || 0), 0);
@@ -89,13 +110,13 @@ const Dashboard: React.FC<{ setScreen: (screen: string) => void }> = ({ setScree
         }
     }
 
-    // Load medication data and compute next due
+    // Load medication data and compute next due with explicit typing
     const savedMeds = getLocalStorageItem<Medication[]>('dash_medications_v2', []);
-    const savedTaken = getLocalStorageItem('dash_medsTaken_v2', {});
+    const savedTaken = getLocalStorageItem<TakenRecordsMap>('dash_medsTaken_v2', {});
+    
     if (Array.isArray(savedMeds) && savedMeds.length > 0) {
-        const medications: Medication[] = savedMeds;
-        const takenRecords = savedTaken;
-        const todaysTaken = takenRecords[todayKey] || [];
+        // Safe indexing using the interface
+        const todaysTaken = savedTaken[todayKey] || [];
         
         const now = new Date();
         const today = new Date();
@@ -103,7 +124,7 @@ const Dashboard: React.FC<{ setScreen: (screen: string) => void }> = ({ setScree
         const todayDay = today.getDay();
         const upcomingInstances: { name: string, time: string, dose: any, unit: any }[] = [];
 
-        medications.forEach(med => {
+        savedMeds.forEach(med => {
             const startDate = new Date(med.startDateISO + 'T00:00:00');
             const endDate = med.endDateISO ? new Date(med.endDateISO + 'T23:59:59') : null;
             const isActive = startDate <= today && (!endDate || today <= endDate) && med.repeatDays.includes(todayDay);
@@ -137,8 +158,8 @@ const Dashboard: React.FC<{ setScreen: (screen: string) => void }> = ({ setScree
 
     // Load settings summary
     const units = getLocalStorageItem('preferences.units', 'us') === 'us' ? 'US' : 'Metric';
-    const exLevelRaw = getLocalStorageItem('exLevel', getLocalStorageItem('preferences.exerciseLevelDefault', 'beginner'));
-    const exerciseLevel = typeof exLevelRaw === 'string' ? exLevelRaw.charAt(0).toUpperCase() + exLevelRaw.slice(1) : 'Beginner';
+    const exLevelRaw = getLocalStorageItem<string>('exLevel', getLocalStorageItem('preferences.exerciseLevelDefault', 'beginner'));
+    const exerciseLevel = exLevelRaw ? exLevelRaw.charAt(0).toUpperCase() + exLevelRaw.slice(1) : 'Beginner';
     const sodiumTarget = getLocalStorageItem('preferences.sodiumTargetMg', 1800);
 
     setSettingsSummary({
