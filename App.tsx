@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -34,28 +35,31 @@ const Reminders = lazy(() => import('./components/Reminders'));
 
 // Function to apply settings from localStorage to the document
 const applyGlobalSettings = () => {
-  const root = document.documentElement;
-  
-  // Font Scale
-  root.classList.remove('font-sm', 'font-lg');
-  // FIX: Explicitly specify the possible types for fontScale to avoid type errors during comparison.
-  const fontScale = getLocalStorageItem<'sm' | 'md' | 'lg'>('display.fontScale', 'md');
-  if (fontScale === 'sm') root.classList.add('font-sm');
-  if (fontScale === 'lg') root.classList.add('font-lg');
-  
-  // Accessibility
-  const highContrast = getLocalStorageItem('accessibility.highContrast', false);
-  if (highContrast) {
-    root.classList.add('high-contrast');
-  } else {
-    root.classList.remove('high-contrast');
-  }
+  try {
+    const root = document.documentElement;
+    
+    // Font Scale
+    root.classList.remove('font-sm', 'font-lg');
+    const fontScale = getLocalStorageItem<'sm' | 'md' | 'lg'>('display.fontScale', 'md');
+    if (fontScale === 'sm') root.classList.add('font-sm');
+    if (fontScale === 'lg') root.classList.add('font-lg');
+    
+    // Accessibility
+    const highContrast = getLocalStorageItem('accessibility.highContrast', false);
+    if (highContrast) {
+      root.classList.add('high-contrast');
+    } else {
+      root.classList.remove('high-contrast');
+    }
 
-  const reduceMotion = getLocalStorageItem('accessibility.reduceMotion', false);
-  if (reduceMotion) {
-    root.classList.add('reduce-motion');
-  } else {
-    root.classList.remove('reduce-motion');
+    const reduceMotion = getLocalStorageItem('accessibility.reduceMotion', false);
+    if (reduceMotion) {
+      root.classList.add('reduce-motion');
+    } else {
+      root.classList.remove('reduce-motion');
+    }
+  } catch (e) {
+    console.warn("Failed to apply global settings:", e);
   }
 };
 
@@ -73,11 +77,16 @@ const App: React.FC = () => {
     window.addEventListener('settings-changed', handleSettingsChange);
     
     // Check if onboarding is complete
-    const onboardingComplete = getLocalStorageItem('onboardingCompleted', false);
-    if (onboardingComplete) {
-      setOnboardingState('complete');
-    } else {
-      setOnboardingState('welcome');
+    try {
+      const onboardingComplete = getLocalStorageItem('onboardingCompleted', false);
+      if (onboardingComplete) {
+        setOnboardingState('complete');
+      } else {
+        setOnboardingState('welcome');
+      }
+    } catch (e) {
+      console.error("Error checking onboarding state:", e);
+      setOnboardingState('welcome'); // Fallback
     }
 
     return () => {
@@ -102,7 +111,9 @@ const App: React.FC = () => {
     { id: 'progress', title: 'Progress', description: 'Review your weekly trends', Icon: ProgressIcon, component: <Progress /> },
   ];
 
-  const activeComponent = menuItems.find(item => item.id === screen)?.component;
+  // Robust screen finding
+  const activeMenuItem = menuItems.find(item => item.id === screen);
+  
   const screenTitleMap: { [key: string]: string | undefined } = {
     ...Object.fromEntries(menuItems.map(item => [item.id, item.title])),
     settings: 'Settings',
@@ -112,13 +123,21 @@ const App: React.FC = () => {
   const screenTitle = screenTitleMap[screen];
   
   const LoadingFallback = () => (
-    <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-brandPrimary"></div>
+    <div className="flex flex-col justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-brandPrimary mb-4"></div>
+        <p className="text-brandPrimary font-semibold">Loading...</p>
     </div>
   );
 
   if (onboardingState === 'checking') {
-    return <div className="bg-creamBg min-h-screen"></div>; // Or a loading spinner
+    return (
+      <div className="bg-creamBg min-h-screen flex justify-center items-center">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brandPrimary mb-2"></div>
+          <p className="text-textSecondary">Initializing...</p>
+        </div>
+      </div>
+    );
   }
 
   if (onboardingState === 'welcome') {
@@ -133,11 +152,12 @@ const App: React.FC = () => {
   }
 
   const renderScreen = () => {
-    switch(screen) {
-        case 'settings': return <Settings />;
-        case 'privacy': return <PrivacyPolicy setScreen={setScreen} />;
-        case 'terms': return <TermsOfService setScreen={setScreen} />;
-        case 'home': return (
+    if (screen === 'settings') return <Settings />;
+    if (screen === 'privacy') return <PrivacyPolicy setScreen={setScreen} />;
+    if (screen === 'terms') return <TermsOfService setScreen={setScreen} />;
+    
+    if (screen === 'home') {
+        return (
             <div className="space-y-4">
               <h1 className="text-2xl font-bold text-textPrimary px-2 pb-2">Welcome!</h1>
               {menuItems.map(({ id, title, description, Icon }) => (
@@ -152,7 +172,7 @@ const App: React.FC = () => {
                   </div>
                   <div className="flex-grow">
                     <p className="font-semibold text-textPrimary text-lg">{title}</p>
-                    <p className="text-textMuted text-[15px] leading-relaxed">{description}</p>
+                    <p className="text-textMuted text-textSecondary text-[15px] leading-relaxed">{description}</p>
                   </div>
                   <div className="flex-shrink-0">
                      <ChevronRightIcon />
@@ -161,13 +181,25 @@ const App: React.FC = () => {
               ))}
             </div>
           );
-        default: return activeComponent;
     }
+
+    // Fallback for defined menu items
+    if (activeMenuItem) {
+        return activeMenuItem.component;
+    }
+
+    // Final Fallback if screen ID is unknown
+    return (
+        <div className="text-center p-10">
+            <p className="text-textSecondary">Screen not found.</p>
+            <button onClick={() => setScreen('home')} className="text-brandPrimary underline mt-4 font-bold">Go Home</button>
+        </div>
+    );
   };
 
 
   return (
-    <div className="bg-creamBg max-w-[430px] mx-auto min-h-screen flex flex-col font-sans text-textPrimary leading-relaxed">
+    <div className="bg-creamBg max-w-[430px] mx-auto min-h-screen flex flex-col font-sans text-textPrimary leading-relaxed shadow-2xl">
       <Header screen={screen} setScreen={setScreen} title={screenTitle} />
       
       <main className="flex-grow px-4 pt-4 pb-20">
@@ -181,5 +213,8 @@ const App: React.FC = () => {
     </div>
   );
 };
+
+export default App;
+
 
 export default App;
