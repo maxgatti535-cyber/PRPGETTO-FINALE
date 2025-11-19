@@ -16,7 +16,7 @@ import {
   ChevronRightIcon
 } from './components/icons';
 
-// Lazy load components
+// Lazy load components with explicit error handling potential
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const AICoach = lazy(() => import('./components/AIChat'));
 const BloodPressure = lazy(() => import('./components/BloodPressure'));
@@ -76,21 +76,34 @@ const App: React.FC = () => {
     const handleSettingsChange = () => applyGlobalSettings();
     window.addEventListener('settings-changed', handleSettingsChange);
     
-    // Check if onboarding is complete
-    try {
-      const onboardingComplete = getLocalStorageItem('onboardingCompleted', false);
-      if (onboardingComplete) {
-        setOnboardingState('complete');
-      } else {
-        setOnboardingState('welcome');
-      }
-    } catch (e) {
-      console.error("Error checking onboarding state:", e);
-      setOnboardingState('welcome'); // Fallback
-    }
+    // Check if onboarding is complete with a safety timeout
+    const checkOnboarding = () => {
+        try {
+            const onboardingComplete = getLocalStorageItem('onboardingCompleted', false);
+            if (onboardingComplete) {
+                setOnboardingState('complete');
+            } else {
+                setOnboardingState('welcome');
+            }
+        } catch (e) {
+            console.error("Error checking onboarding state:", e);
+            setOnboardingState('welcome'); // Fallback
+        }
+    };
+
+    checkOnboarding();
+
+    // Safety timeout: if still checking after 2 seconds, force it to open
+    const safetyTimer = setTimeout(() => {
+        if (onboardingState === 'checking') {
+            console.warn("Onboarding check timed out, forcing load.");
+            setOnboardingState('complete'); // Or welcome, but complete is safer to show *something*
+        }
+    }, 2000);
 
     return () => {
       window.removeEventListener('settings-changed', handleSettingsChange);
+      clearTimeout(safetyTimer);
     };
   }, []);
 
@@ -125,7 +138,7 @@ const App: React.FC = () => {
   const LoadingFallback = () => (
     <div className="flex flex-col justify-center items-center h-64">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-brandPrimary mb-4"></div>
-        <p className="text-brandPrimary font-semibold">Loading...</p>
+        <p className="text-brandPrimary font-semibold">Loading component...</p>
     </div>
   );
 
@@ -152,49 +165,54 @@ const App: React.FC = () => {
   }
 
   const renderScreen = () => {
-    if (screen === 'settings') return <Settings />;
-    if (screen === 'privacy') return <PrivacyPolicy setScreen={setScreen} />;
-    if (screen === 'terms') return <TermsOfService setScreen={setScreen} />;
+    try {
+        if (screen === 'settings') return <Settings />;
+        if (screen === 'privacy') return <PrivacyPolicy setScreen={setScreen} />;
+        if (screen === 'terms') return <TermsOfService setScreen={setScreen} />;
+        
+        if (screen === 'home') {
+            return (
+                <div className="space-y-4">
+                  <h1 className="text-2xl font-bold text-textPrimary px-2 pb-2">Welcome!</h1>
+                  {menuItems.map(({ id, title, description, Icon }) => (
+                    <button
+                      key={id}
+                      onClick={() => setScreen(id)}
+                      className="w-full bg-surface p-5 rounded-xl shadow-sm shadow-shadowSoft border border-brandPrimaryDark flex items-center space-x-4 text-left hover:bg-brandPrimaryTint/50 hover:shadow-md active:shadow-lg active:border-brandPrimary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brandPrimary transition-all group active:scale-[.98] transform"
+                      aria-label={`Go to ${title}`}
+                    >
+                      <div className="flex-shrink-0 w-11 h-11 bg-brandPrimaryTint rounded-full flex items-center justify-center transition-colors group-hover:bg-brandAccent/50 shadow-sm">
+                        <Icon />
+                      </div>
+                      <div className="flex-grow">
+                        <p className="font-semibold text-textPrimary text-lg">{title}</p>
+                        <p className="text-textMuted text-textSecondary text-[15px] leading-relaxed">{description}</p>
+                      </div>
+                      <div className="flex-shrink-0">
+                         <ChevronRightIcon />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              );
+        }
     
-    if (screen === 'home') {
+        // Fallback for defined menu items
+        if (activeMenuItem) {
+            return activeMenuItem.component;
+        }
+    
+        // Final Fallback if screen ID is unknown
         return (
-            <div className="space-y-4">
-              <h1 className="text-2xl font-bold text-textPrimary px-2 pb-2">Welcome!</h1>
-              {menuItems.map(({ id, title, description, Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setScreen(id)}
-                  className="w-full bg-surface p-5 rounded-xl shadow-sm shadow-shadowSoft border border-brandPrimaryDark flex items-center space-x-4 text-left hover:bg-brandPrimaryTint/50 hover:shadow-md active:shadow-lg active:border-brandPrimary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brandPrimary transition-all group active:scale-[.98] transform"
-                  aria-label={`Go to ${title}`}
-                >
-                  <div className="flex-shrink-0 w-11 h-11 bg-brandPrimaryTint rounded-full flex items-center justify-center transition-colors group-hover:bg-brandAccent/50 shadow-sm">
-                    <Icon />
-                  </div>
-                  <div className="flex-grow">
-                    <p className="font-semibold text-textPrimary text-lg">{title}</p>
-                    <p className="text-textMuted text-textSecondary text-[15px] leading-relaxed">{description}</p>
-                  </div>
-                  <div className="flex-shrink-0">
-                     <ChevronRightIcon />
-                  </div>
-                </button>
-              ))}
+            <div className="text-center p-10">
+                <p className="text-textSecondary">Screen not found.</p>
+                <button onClick={() => setScreen('home')} className="text-brandPrimary underline mt-4 font-bold">Go Home</button>
             </div>
-          );
+        );
+    } catch (error) {
+        console.error("Error rendering screen:", error);
+        return <div className="p-4 text-red-600">Error rendering this screen. Please return Home.</div>;
     }
-
-    // Fallback for defined menu items
-    if (activeMenuItem) {
-        return activeMenuItem.component;
-    }
-
-    // Final Fallback if screen ID is unknown
-    return (
-        <div className="text-center p-10">
-            <p className="text-textSecondary">Screen not found.</p>
-            <button onClick={() => setScreen('home')} className="text-brandPrimary underline mt-4 font-bold">Go Home</button>
-        </div>
-    );
   };
 
 
@@ -213,8 +231,5 @@ const App: React.FC = () => {
     </div>
   );
 };
-
-export default App;
-
 
 export default App;
