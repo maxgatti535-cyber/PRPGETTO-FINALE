@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { getLocalStorageItem } from './utils';
 
@@ -18,12 +19,14 @@ const BPChart: React.FC<{ readings: Reading[] }> = ({ readings }) => {
     const padding = { top: 20, right: 20, bottom: 40, left: 40 };
 
     const chartData = useMemo(() => {
-        if (readings.length < 2) return [];
-        return readings.map(r => ({
-            date: new Date(`${r.date}T${r.time}`),
-            systolic: Number(r.systolic),
-            diastolic: Number(r.diastolic)
-        }));
+        if (!Array.isArray(readings) || readings.length < 2) return [];
+        return readings
+            .filter(r => r && r.date && r.time && !isNaN(Number(r.systolic)))
+            .map(r => ({
+                date: new Date(`${r.date}T${r.time}`),
+                systolic: Number(r.systolic),
+                diastolic: Number(r.diastolic)
+            }));
     }, [readings]);
 
     if (chartData.length < 2) {
@@ -105,7 +108,7 @@ const Progress: React.FC = () => {
   useEffect(() => {
     // BP Trend
     const savedBP = getLocalStorageItem<Reading[]>('dash_bp_readings', []);
-    if (savedBP.length > 0) {
+    if (Array.isArray(savedBP) && savedBP.length > 0) {
       const readings: Reading[] = savedBP;
       readings.sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime());
       setAllBpReadings(readings);
@@ -160,7 +163,7 @@ const Progress: React.FC = () => {
     // Med Adherence
     const savedMeds = getLocalStorageItem('dash_medications_v2', []);
     const savedTaken = getLocalStorageItem('dash_medsTaken_v2', {});
-    if (savedMeds.length > 0) {
+    if (Array.isArray(savedMeds) && savedMeds.length > 0) {
       const medications = savedMeds;
       const takenRecords = savedTaken;
       if (medications.length > 0) {
