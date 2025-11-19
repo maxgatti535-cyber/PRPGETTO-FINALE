@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { getLocalStorageItem, markdownToHtml } from './utils';
 
+// Fix for TypeScript build error: process is not defined in browser types
+declare const process: any;
+
 const AI_COACH_SYSTEM_PROMPT = `IDENTITY & ROLE
 You are “DASH Coach,” a digital assistant specialized in DASH eating and cardiovascular health for adults over 50. You help with nutrition, physical activity, blood pressure management, and motivation — always with empathy, clarity, and within wellness limits.
 
@@ -196,7 +199,6 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
 
         // SAFEGUARD: Access the API key injected by Vite.
         // Vite replaces 'process.env.API_KEY' directly with the string value.
-        // We do NOT verify 'process' object existence here because 'process.env.API_KEY' is a literal replacement.
         const apiKey = process.env.API_KEY || '';
         
         if (!apiKey) {
@@ -329,4 +331,5 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
   );
 };
 
+export default AICoach;
 export default AICoach;
