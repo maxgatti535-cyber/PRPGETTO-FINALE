@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import WelcomeScreen from './components/WelcomeScreen'; // Direct import for faster startup
 import { getLocalStorageItem } from './components/utils';
 import {
   DashboardIcon,
@@ -16,7 +16,7 @@ import {
   ChevronRightIcon
 } from './components/icons';
 
-// Lazy load components with explicit error handling potential
+// Lazy load other components
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const AICoach = lazy(() => import('./components/AIChat'));
 const BloodPressure = lazy(() => import('./components/BloodPressure'));
@@ -26,12 +26,10 @@ const Education = lazy(() => import('./components/Education'));
 const Exercise = lazy(() => import('./components/Exercise'));
 const Progress = lazy(() => import('./components/Progress'));
 const Settings = lazy(() => import('./components/Settings'));
-const WelcomeScreen = lazy(() => import('./components/WelcomeScreen'));
 const ProfileSetupScreen = lazy(() => import('./components/ProfileSetupScreen'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
 const Reminders = lazy(() => import('./components/Reminders'));
-
 
 // Function to apply settings from localStorage to the document
 const applyGlobalSettings = () => {
@@ -97,7 +95,7 @@ const App: React.FC = () => {
     const safetyTimer = setTimeout(() => {
         if (onboardingState === 'checking') {
             console.warn("Onboarding check timed out, forcing load.");
-            setOnboardingState('complete'); // Or welcome, but complete is safer to show *something*
+            setOnboardingState('complete');
         }
     }, 2000);
 
@@ -153,8 +151,9 @@ const App: React.FC = () => {
     );
   }
 
+  // WelcomeScreen is NOT suspended now
   if (onboardingState === 'welcome') {
-    return <Suspense fallback={<LoadingFallback />}><WelcomeScreen onComplete={() => setOnboardingState('profileSetup')} /></Suspense>;
+    return <WelcomeScreen onComplete={() => setOnboardingState('profileSetup')} />;
   }
 
   if (onboardingState === 'profileSetup') {
@@ -233,6 +232,5 @@ const App: React.FC = () => {
 };
 
 export default App;
-
 
 export default App;
