@@ -292,5 +292,3 @@ const Progress: React.FC = () => {
 };
 
 export default Progress;
-
-export default Progress;
