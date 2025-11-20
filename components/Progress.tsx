@@ -19,7 +19,7 @@ interface Medication {
   repeatDays: number[];
   scheduleType: "times" | "slots";
   times?: string[];
-  slots?: ("Morning" | "Noon" | "Evening" | "Bedtime")[];
+  slots?: string[];
   slotTimes?: { [key: string]: string };
 }
 
@@ -27,6 +27,8 @@ interface TakenRecord {
     medId: string;
     time: string;
 }
+
+const SLOT_TIMES: Record<string, string> = { Morning: '08:00', Noon: '12:00', Evening: '18:00', Bedtime: '22:00' };
 
 // --- CHART COMPONENT ---
 const BPChart: React.FC<{ readings: Reading[] }> = ({ readings }) => {
@@ -104,15 +106,6 @@ const BPChart: React.FC<{ readings: Reading[] }> = ({ readings }) => {
 
 const getTodayString = () => new Date().toLocaleDateString('en-US');
 
-const InfoIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 flex-shrink-0" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-        <path d="M12 9h.01" />
-        <path d="M11 12h1v4h1" />
-    </svg>
-);
-
 const Progress: React.FC = () => {
   const [bpTrend, setBpTrend] = useState('Not enough data to show a trend.');
   const [waterHabit, setWaterHabit] = useState('No water intake logged in the past 7 days.');
@@ -186,7 +179,6 @@ const Progress: React.FC = () => {
       if (medications.length > 0) {
         let takenCount = 0;
         let scheduledCount = 0;
-        const SLOT_TIMES: { [key: string]: string } = { Morning: '08:00', Noon: '12:00', Evening: '18:00', Bedtime: '22:00' };
 
         for (let i = 0; i < 7; i++) {
           const date = new Date();
@@ -247,64 +239,61 @@ const Progress: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <div className="bg-brandPrimaryTint text-brandPrimary p-3 rounded-lg flex items-start gap-3">
-        <InfoIcon />
-        <div>
-            <h2 className="text-[22px] font-bold text-brandPrimaryDark">Your Progress</h2>
-            <p className="text-brandPrimaryDark/90 mt-1 text-lg">A look at your trends from the last week.</p>
-        </div>
-      </div>
-      
+      {/* BP Chart Section */}
       <div className="bg-surface p-5 rounded-xl shadow-sm shadow-shadowSoft border border-brandPrimaryDark">
-            <h3 className="font-bold text-xl text-textPrimary">Blood Pressure Chart</h3>
-            <div className="flex justify-center gap-2 my-4">
-                {( [7, 30, 90] as const ).map(days => (
-                    <button
-                        key={days}
-                        onClick={() => setTimeRange(days)}
-                        className={`py-2 px-4 rounded-full font-semibold text-base transition-colors ${timeRange === days ? 'bg-brandPrimary text-white' : 'bg-border text-textSecondary'}`}
-                    >
-                        {days} Days
-                    </button>
-                ))}
-            </div>
-            <BPChart readings={filteredReadings} />
-            <div className="flex justify-center items-center gap-4 mt-4">
-                <div className="flex items-center gap-2"><div className="w-4 h-1 bg-danger rounded-full"></div><span className="text-sm">Systolic</span></div>
-                <div className="flex items-center gap-2"><div className="w-4 h-1 bg-accentBlue rounded-full"></div><span className="text-sm">Diastolic</span></div>
-            </div>
+        <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-textPrimary">BP Trends</h2>
+            <select 
+                value={timeRange} 
+                onChange={(e) => setTimeRange(Number(e.target.value) as 7 | 30 | 90)}
+                className="bg-surface border border-border rounded-lg text-sm py-1 px-2 focus:ring-brandPrimary focus:border-brandPrimary"
+            >
+                <option value={7}>Last 7 Days</option>
+                <option value={30}>Last 30 Days</option>
+                <option value={90}>Last 90 Days</option>
+            </select>
         </div>
+        <BPChart readings={filteredReadings} />
+        <p className="text-lg text-textSecondary mt-4">{bpTrend}</p>
+      </div>
 
-      <div className="bg-surface p-5 rounded-xl shadow-sm shadow-shadowSoft border border-brandPrimaryDark space-y-4">
-        <div>
-          <h3 className="font-bold text-xl text-textPrimary">Weekly Average BP Trend</h3>
-          <p className="text-textSecondary text-lg">{bpTrend}</p>
-        </div>
-        <div className="border-t border-border pt-4">
-          <h3 className="font-bold text-xl text-textPrimary">Medication Adherence</h3>
-          <p className="text-textSecondary text-lg">{medAdherence}</p>
-        </div>
-         <div className="border-t border-border pt-4">
-          <h3 className="font-bold text-xl text-textPrimary">Water Habit</h3>
-          <p className="text-textSecondary text-lg">{waterHabit}</p>
+      {/* Habits Section */}
+      <div className="bg-surface p-5 rounded-xl shadow-sm shadow-shadowSoft border border-brandPrimaryDark">
+        <h2 className="text-xl font-bold text-textPrimary mb-3">Weekly Habits</h2>
+        <div className="space-y-4">
+            <div className="flex items-start gap-3">
+                 <div className="bg-blue-100 p-2 rounded-full text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+                 </div>
+                 <div>
+                     <p className="font-bold text-lg text-textPrimary">Hydration</p>
+                     <p className="text-textSecondary text-lg">{waterHabit}</p>
+                 </div>
+            </div>
+             <div className="flex items-start gap-3">
+                 <div className="bg-green-100 p-2 rounded-full text-green-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                 </div>
+                 <div>
+                     <p className="font-bold text-lg text-textPrimary">Medication</p>
+                     <p className="text-textSecondary text-lg">{medAdherence}</p>
+                 </div>
+            </div>
         </div>
       </div>
-      
-       <div className="bg-surface p-5 rounded-xl shadow-sm shadow-shadowSoft border border-brandPrimaryDark">
-        <h3 className="font-bold text-xl text-textPrimary mb-2">Notes on Mood & Energy</h3>
-        <textarea 
+
+      {/* Journal Section */}
+      <div className="bg-surface p-5 rounded-xl shadow-sm shadow-shadowSoft border border-brandPrimaryDark">
+        <h2 className="text-xl font-bold text-textPrimary mb-2">Daily Journal ({getTodayString()})</h2>
+        <textarea
             value={note}
             onChange={handleNoteChange}
-            rows={4}
-            className="w-full rounded-lg border-border bg-surface shadow-sm p-3 text-lg focus:border-transparent focus:ring-2 focus:ring-brandPrimary"
-            placeholder="How have you been feeling this week?"
-        />
-        <p className="text-sm text-textMuted mt-1">Today's note is saved automatically.</p>
-       </div>
+            className="w-full p-3 rounded-lg border-border bg-surface shadow-sm text-lg focus:border-transparent focus:ring-2 focus:ring-brandPrimary h-32"
+            placeholder="How are you feeling today? Any symptoms or wins?"
+        ></textarea>
+      </div>
     </div>
   );
 };
-
-export default Progress;
 
 export default Progress;
