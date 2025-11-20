@@ -16,6 +16,8 @@ export default defineConfig(({ mode }) => {
       // Defines global constant replacements. 
       // Using string concatenation ensures the variable is replaced safely.
       'process.env.API_KEY': JSON.stringify(apiKey),
+      // Safety fallback for process.env to avoid "process is not defined" in browser
+      'process.env': {}, 
     },
     base: './', // Ensure relative paths for assets so it works on GitHub Pages subdirectories
     build: {
