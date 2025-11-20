@@ -11,7 +11,6 @@ interface Reading {
     note: string;
 }
 
-// Duplicate interface from Medications.tsx to ensure independent type safety
 interface Medication {
   id: string;
   startDateISO: string;
@@ -291,5 +290,7 @@ const Progress: React.FC = () => {
     </div>
   );
 };
+
+export default Progress;
 
 export default Progress;
