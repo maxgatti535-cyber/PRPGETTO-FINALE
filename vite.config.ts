@@ -8,13 +8,14 @@ declare const process: any;
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   const env = loadEnv(mode, process.cwd(), '');
-  
+  const apiKey = env.API_KEY || '';
+
   return {
     plugins: [react()],
     define: {
       // Defines global constant replacements. 
-      // Safe check: if env.API_KEY is undefined, use empty string to avoid build crashes.
-      'process.env.API_KEY': JSON.stringify(env.API_KEY || ''),
+      // Using string concatenation ensures the variable is replaced safely.
+      'process.env.API_KEY': JSON.stringify(apiKey),
     },
     base: './', // Ensure relative paths for assets so it works on GitHub Pages subdirectories
     build: {
