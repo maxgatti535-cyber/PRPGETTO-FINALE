@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DASH Over 50 METHOD™</title>
     
-    <!-- Tailwind CSS via CDN for rapid styling -->
+    <!-- Tailwind CSS per lo stile -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -44,36 +44,22 @@
     <style>
       body { overscroll-behavior-y: contain; height: 100%; margin: 0; }
       #root { height: 100%; }
-      /* Animation Utilities */
+      /* Animazioni */
       @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
       
-      /* High Contrast & Accessibility Support */
+      /* Accessibilità */
       .font-sm { font-size: 14px; }
       .font-lg { font-size: 18px; }
       .reduce-motion * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
       .high-contrast { --hc-bg: #000 !important; --hc-text: #FFF !important; }
       .high-contrast body { background-color: var(--hc-bg) !important; color: var(--hc-text) !important; }
     </style>
-
-</script>
 </head>
   <body>
     <div id="root"></div>
-    <!-- Fallback error message if React fails to load -->
-    <script>
-      window.addEventListener('error', function(e) {
-        const root = document.getElementById('root');
-        // Only show fallback if root is truly empty after a delay
-        if(root && (!root.innerHTML || root.innerHTML.trim() === '')) {
-           setTimeout(() => {
-             if(!root.innerHTML || root.innerHTML.trim() === '') {
-                console.error("App failed to mount:", e);
-             }
-           }, 3000);
-        }
-      });
-    </script>
+    <!-- Questo script fa partire tutto -->
     <script type="module" src="/index.tsx"></script>
   </body>
+</html>
 </html>
