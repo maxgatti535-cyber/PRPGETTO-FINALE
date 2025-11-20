@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { getLocalStorageItem } from './utils';
 
@@ -295,5 +296,7 @@ const Progress: React.FC = () => {
     </div>
   );
 };
+
+export default Progress;
 
 export default Progress;
