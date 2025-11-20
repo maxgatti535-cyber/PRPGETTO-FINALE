@@ -1,9 +1,9 @@
-
 {
   "name": "dash-over-50-method",
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "homepage": ".",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
