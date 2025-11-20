@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { getLocalStorageItem } from './utils';
 
-// --- TYPE DEFINITIONS ---
+// --- DEFINIZIONI TIPI ---
 interface Reading {
     id: number;
     date: string;
@@ -11,7 +11,6 @@ interface Reading {
     note: string;
 }
 
-// Simplified Medication interface for Progress component usage
 interface Medication {
   id: string;
   startDateISO: string;
@@ -20,7 +19,7 @@ interface Medication {
   scheduleType: "times" | "slots";
   times?: string[];
   slots?: string[];
-  slotTimes?: { [key: string]: string };
+  slotTimes?: Record<string, string>;
 }
 
 interface TakenRecord {
@@ -28,9 +27,14 @@ interface TakenRecord {
     time: string;
 }
 
-const SLOT_TIMES: Record<string, string> = { Morning: '08:00', Noon: '12:00', Evening: '18:00', Bedtime: '22:00' };
+const SLOT_TIMES: Record<string, string> = { 
+  Morning: '08:00', 
+  Noon: '12:00', 
+  Evening: '18:00', 
+  Bedtime: '22:00' 
+};
 
-// --- CHART COMPONENT ---
+// --- COMPONENTE GRAFICO ---
 const BPChart: React.FC<{ readings: Reading[] }> = ({ readings }) => {
     const width = 350;
     const height = 200;
@@ -194,8 +198,8 @@ const Progress: React.FC = () => {
                 times = med.times;
             } else if (med.scheduleType === 'slots' && med.slots) {
                 times = med.slots.map(slot => {
-                    // Robust checking for slotTimes
                     const customTime = med.slotTimes ? med.slotTimes[slot] : undefined;
+                    // Use optional chaining and fallback safely
                     return customTime || SLOT_TIMES[slot] || '00:00';
                 });
             }
