@@ -16,13 +16,17 @@ export default defineConfig(({ mode }) => {
       // Defines global constant replacements. 
       'process.env.API_KEY': JSON.stringify(apiKey),
       'process.env.NODE_ENV': JSON.stringify(mode),
-      // Safety fallback for process.env to avoid "process is not defined" in browser
-      'process.env': {}, 
+      // We define process.env as an object to prevent "process is not defined" errors,
+      // but we must be careful not to overwrite specific keys defined above.
+      // In Vite, specific string replacements happen before this object definition.
     },
     base: './', // Ensure relative paths for assets so it works on GitHub Pages subdirectories
     build: {
       outDir: 'dist',
-      sourcemap: true
+      sourcemap: true,
+      commonjsOptions: {
+        transformMixedEsModules: true,
+      },
     }
   };
 });
