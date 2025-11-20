@@ -14,8 +14,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     define: {
       // Defines global constant replacements. 
-      // Using string concatenation ensures the variable is replaced safely.
       'process.env.API_KEY': JSON.stringify(apiKey),
+      'process.env.NODE_ENV': JSON.stringify(mode),
       // Safety fallback for process.env to avoid "process is not defined" in browser
       'process.env': {}, 
     },
