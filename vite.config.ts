@@ -3,13 +3,17 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
+  // Load env file based on `mode` in the current working directory.
+  // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), '');
   
   return {
     plugins: [react()],
     define: {
-      // Create a global constant for the API key to avoid 'process' issues in browser
-      '__API_KEY__': JSON.stringify(env.API_KEY || ''),
+      // Strictly define process.env.API_KEY to match Google GenAI guidelines
+      'process.env.API_KEY': JSON.stringify(env.API_KEY || ''),
+      // Polyfill process.env to avoid crashes in browser environment
+      'process.env': {},
     },
     base: './',
     build: {
