@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     define: {
       // Defines global constant replacements. 
-      // We ONLY replace the specific API key string to avoid breaking other libraries that check 'process.env'.
-      'process.env.API_KEY': JSON.stringify(env.API_KEY),
+      // Safe check: if env.API_KEY is undefined, use empty string to avoid build crashes.
+      'process.env.API_KEY': JSON.stringify(env.API_KEY || ''),
     },
     base: './', // Ensure relative paths for assets so it works on GitHub Pages subdirectories
     build: {
