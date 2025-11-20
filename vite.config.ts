@@ -8,12 +8,9 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // Qui diciamo al sito di usare la chiave API sicura
-      'process.env.API_KEY': JSON.stringify(env.API_KEY || ''),
-      // Evitiamo che il sito si rompa se cerca "process"
-      'process.env': {}
+      // Create a global constant for the API key to avoid 'process' issues in browser
+      '__API_KEY__': JSON.stringify(env.API_KEY || ''),
     },
-    // Questo punto "./" è fondamentale per GitHub Pages
     base: './',
     build: {
       outDir: 'dist',
