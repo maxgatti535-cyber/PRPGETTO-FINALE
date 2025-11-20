@@ -495,7 +495,8 @@ const MedicationForm: React.FC<{ med: Medication | null; onSave: (med: Medicatio
   });
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
+    // Safe casting for checkbox
     const isCheckbox = (e.target as HTMLInputElement).type === 'checkbox';
     const checked = (e.target as HTMLInputElement).checked;
     
