@@ -193,10 +193,9 @@ const Progress: React.FC = () => {
             if (med.scheduleType === 'times' && med.times) {
                 times = med.times;
             } else if (med.scheduleType === 'slots' && med.slots) {
-                // Ensure safe access to SLOT_TIMES and slotTimes
                 times = med.slots.map(slot => {
-                    if (med.slotTimes && med.slotTimes[slot]) return med.slotTimes[slot];
-                    return SLOT_TIMES[slot] || '00:00'; // Fallback ensures string is always returned
+                    const customTime = med.slotTimes?.[slot];
+                    return customTime || SLOT_TIMES[slot] || '00:00';
                 });
             }
             
@@ -293,5 +292,4 @@ const Progress: React.FC = () => {
   );
 };
 
-export default Progress;
 export default Progress;
