@@ -11,6 +11,7 @@ interface Reading {
     note: string;
 }
 
+// Simplified Medication interface for Progress component usage
 interface Medication {
   id: string;
   startDateISO: string;
@@ -193,7 +194,8 @@ const Progress: React.FC = () => {
                 times = med.times;
             } else if (med.scheduleType === 'slots' && med.slots) {
                 times = med.slots.map(slot => {
-                    const customTime = med.slotTimes?.[slot];
+                    // Robust checking for slotTimes
+                    const customTime = med.slotTimes ? med.slotTimes[slot] : undefined;
                     return customTime || SLOT_TIMES[slot] || '00:00';
                 });
             }
