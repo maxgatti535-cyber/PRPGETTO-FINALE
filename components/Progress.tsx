@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { getLocalStorageItem } from './utils';
 
@@ -54,13 +53,12 @@ const BPChart: React.FC<{ readings: Reading[] }> = ({ readings }) => {
 
     const minDate = chartData[0].date;
     const maxDate = chartData[chartData.length - 1].date;
-    const dateRange = maxDate.getTime() - minDate.getTime() || 1; // Prevent division by zero if only one date
+    const dateRange = maxDate.getTime() - minDate.getTime() || 1; 
     
-    // Add a buffer to min/max y values
     const allValues = chartData.flatMap(d => [d.systolic, d.diastolic]);
     const minY = Math.floor((Math.min(...allValues) - 10) / 10) * 10;
     const maxY = Math.ceil((Math.max(...allValues) + 10) / 10) * 10;
-    const yRange = maxY - minY || 1; // Prevent division by zero
+    const yRange = maxY - minY || 1; 
 
     const xScale = (date: Date) => padding.left + ((date.getTime() - minDate.getTime()) / dateRange) * (width - padding.left - padding.right);
     const yScale = (value: number) => padding.top + (1 - ((value - minY) / yRange)) * (height - padding.top - padding.bottom);
@@ -78,22 +76,18 @@ const BPChart: React.FC<{ readings: Reading[] }> = ({ readings }) => {
     return (
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto" aria-labelledby="bp-chart-title" role="img">
             <title id="bp-chart-title">Blood Pressure Trend Chart</title>
-            {/* Y Axis Grid Lines & Labels */}
             {yAxisLabels.map(label => (
                 <g key={label} className="text-textMuted">
                     <line x1={padding.left} x2={width - padding.right} y1={yScale(label)} y2={yScale(label)} stroke="currentColor" strokeWidth="0.5" strokeDasharray="2,3" />
                     <text x={padding.left - 8} y={yScale(label) + 4} textAnchor="end" fontSize="10">{label}</text>
                 </g>
             ))}
-            {/* X Axis Labels */}
             <g className="text-textMuted">
                 <text x={padding.left} y={height - padding.bottom + 15} textAnchor="start" fontSize="10">{formatDate(minDate)}</text>
                 <text x={width - padding.right} y={height - padding.bottom + 15} textAnchor="end" fontSize="10">{formatDate(maxDate)}</text>
             </g>
-            {/* Data Lines */}
             <path d={systolicPath} fill="none" stroke="#B91C1C" strokeWidth="2" strokeLinecap="round" />
             <path d={diastolicPath} fill="none" stroke="#0EA5E9" strokeWidth="2" strokeLinecap="round" />
-            {/* Data Points */}
             {chartData.map((d, i) => (
                 <g key={i}>
                     <circle cx={xScale(d.date)} cy={yScale(d.systolic)} r="3" fill="#B91C1C" />
@@ -199,7 +193,11 @@ const Progress: React.FC = () => {
             if (med.scheduleType === 'times' && med.times) {
                 times = med.times;
             } else if (med.scheduleType === 'slots' && med.slots) {
-                times = med.slots.map(slot => (med.slotTimes && med.slotTimes[slot]) ? med.slotTimes[slot] : SLOT_TIMES[slot]);
+                // Ensure safe access to SLOT_TIMES and slotTimes
+                times = med.slots.map(slot => {
+                    if (med.slotTimes && med.slotTimes[slot]) return med.slotTimes[slot];
+                    return SLOT_TIMES[slot] || '00:00'; // Fallback ensures string is always returned
+                });
             }
             
             times.forEach(time => {
@@ -220,7 +218,6 @@ const Progress: React.FC = () => {
       }
     }
     
-    // Progress Note
     const savedNote = getLocalStorageItem(`dash_progress_note_${getTodayString()}`, '');
     setNote(savedNote);
     
@@ -233,7 +230,6 @@ const Progress: React.FC = () => {
   
   const filteredReadings = useMemo(() => {
     const now = new Date();
-    // Create a new date object for cutoff to avoid mutating 'now'
     const cutoffDate = new Date(new Date().setDate(now.getDate() - timeRange));
     return allBpReadings.filter(r => new Date(`${r.date}T${r.time}`) >= cutoffDate);
   }, [allBpReadings, timeRange]);
