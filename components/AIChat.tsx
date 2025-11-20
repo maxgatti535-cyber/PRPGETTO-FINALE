@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { getLocalStorageItem, markdownToHtml } from './utils';
 
-// Fix for TypeScript build error: process is not defined in browser types
-declare const process: any;
+// Declare the global constant defined in vite.config.ts
+declare const __API_KEY__: string;
 
 const AI_COACH_SYSTEM_PROMPT = `IDENTITY & ROLE
 You are “DASH Coach,” a digital assistant specialized in DASH eating and cardiovascular health for adults over 50. You help with nutrition, physical activity, blood pressure management, and motivation — always with empathy, clarity, and within wellness limits.
@@ -197,9 +197,8 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
 
         const personalizedSystemPrompt = AI_COACH_SYSTEM_PROMPT + contextString;
 
-        // SAFEGUARD: Access the API key injected by Vite.
-        // Vite replaces 'process.env.API_KEY' directly with the string value.
-        const apiKey = process.env.API_KEY || '';
+        // USE GLOBAL CONSTANT FOR API KEY
+        const apiKey = typeof __API_KEY__ !== 'undefined' ? __API_KEY__ : '';
         
         if (!apiKey) {
              throw new Error("API Key is missing. Please check your environment settings.");
@@ -331,5 +330,4 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
   );
 };
 
-export default AICoach;
 export default AICoach;
