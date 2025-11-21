@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { getLocalStorageItem, markdownToHtml } from './utils';
 
+// Define global constant from vite config
+declare const __API_KEY__: string;
+
 const AI_COACH_SYSTEM_PROMPT = `IDENTITY & ROLE
 You are “DASH Coach,” a digital assistant specialized in DASH eating and cardiovascular health for adults over 50. You help with nutrition, physical activity, blood pressure management, and motivation — always with empathy, clarity, and within wellness limits.
 
@@ -194,17 +197,15 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
 
         const personalizedSystemPrompt = AI_COACH_SYSTEM_PROMPT + contextString;
 
-        // Initialize using the specific guideline method
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        // Initialize using the global constant __API_KEY__
+        // DO NOT use process.env here
+        const ai = new GoogleGenAI({ apiKey: __API_KEY__ });
         
         let response: GenerateContentResponse | undefined;
         const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-flash-latest', 'gemini-pro'];
 
         for (const modelName of modelsToTry) {
             try {
-                // Using ai.models.generateContent directly as per some guidelines, or chats for history
-                // Since we are maintaining simple chat history in UI, we can use a fresh chat or generateContent
-                // The provided snippet used chats.create, sticking to that pattern but with correct Init
                 const chat = ai.chats.create({
                     model: modelName,
                     config: { systemInstruction: personalizedSystemPrompt },
