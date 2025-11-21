@@ -1,66 +1,40 @@
 <!DOCTYPE html>
-<html lang="en" style="height: 100%;">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DASH Over 50 METHOD™</title>
-    
-    <!-- Tailwind CSS via CDN for rapid styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
-            extend: {
-                colors: {
-                    brandPrimary: '#1B847C',
-                    brandPrimaryDark: '#0F3E35',
-                    brandPrimaryTint: '#E6F4F1',
-                    brandAccent: '#9FD7C5',
-                    creamBg: '#F7F3E9',
-                    surface: '#FFFFFF',
-                    border: '#E5E7EB',
-                    textPrimary: '#0F172A',
-                    textSecondary: '#475569',
-                    textMuted: '#64748B',
-                    textOnDark: '#FFFFFF',
-                    shadowSoft: 'rgba(0,0,0,0.08)',
-                    accentBlue: '#0EA5E9',
-                    danger: '#B91C1C',
-                    warning: '#F59E0B',
-                    success: '#16A34A',
-                }
+          extend: {
+            colors: {
+              brandPrimary: '#1B847C',
+              brandPrimaryDark: '#0F3E35',
+              brandPrimaryTint: '#E6F4F1',
+              brandAccent: '#9FD7C5',
+              creamBg: '#F7F3E9',
+              surface: '#FFFFFF',
+              border: '#E5E7EB',
+              textPrimary: '#0F172A',
+              textSecondary: '#475569',
+              textMuted: '#64748B',
+              danger: '#B91C1C',
+              warning: '#F59E0B',
+              success: '#16A34A',
             }
+          }
         }
       }
     </script>
-    
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#1B847C" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="DASH Coach" />
-    <link rel="apple-touch-icon" href="https://i.imgur.com/vZhVvfY.png" />
-    
     <style>
-      body { overscroll-behavior-y: contain; height: 100%; margin: 0; }
+      body { background-color: #F7F3E9; margin: 0; height: 100%; }
       #root { height: 100%; }
-      /* Animation Utilities */
-      @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-      .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
-      
-      /* High Contrast & Accessibility Support */
-      .font-sm { font-size: 14px; }
-      .font-lg { font-size: 18px; }
-      .reduce-motion * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-      .high-contrast { --hc-bg: #000 !important; --hc-text: #FFF !important; }
-      .high-contrast body { background-color: var(--hc-bg) !important; color: var(--hc-text) !important; }
     </style>
-
-</script>
-</head>
+  </head>
   <body>
     <div id="root"></div>
-    <!-- Using ./index.tsx ensures correct relative path loading in subdirectories -->
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
