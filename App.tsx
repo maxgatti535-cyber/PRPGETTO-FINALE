@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import WelcomeScreen from './components/WelcomeScreen'; // Direct import for faster startup
+import WelcomeScreen from './components/WelcomeScreen';
 import { getLocalStorageItem } from './components/utils';
 import {
   DashboardIcon,
@@ -16,7 +16,6 @@ import {
   ChevronRightIcon
 } from './components/icons';
 
-// Lazy load other components
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const AICoach = lazy(() => import('./components/AIChat'));
 const BloodPressure = lazy(() => import('./components/BloodPressure'));
@@ -31,18 +30,14 @@ const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
 const Reminders = lazy(() => import('./components/Reminders'));
 
-// Function to apply settings from localStorage to the document
 const applyGlobalSettings = () => {
   try {
     const root = document.documentElement;
-    
-    // Font Scale
     root.classList.remove('font-sm', 'font-lg');
     const fontScale = getLocalStorageItem<'sm' | 'md' | 'lg'>('display.fontScale', 'md');
     if (fontScale === 'sm') root.classList.add('font-sm');
     if (fontScale === 'lg') root.classList.add('font-lg');
     
-    // Accessibility
     const highContrast = getLocalStorageItem('accessibility.highContrast', false);
     if (highContrast) {
       root.classList.add('high-contrast');
@@ -69,12 +64,11 @@ const App: React.FC = () => {
   const [onboardingState, setOnboardingState] = useState<OnboardingState>('checking');
 
   useEffect(() => {
-    applyGlobalSettings(); // Apply on initial load
+    applyGlobalSettings();
 
     const handleSettingsChange = () => applyGlobalSettings();
     window.addEventListener('settings-changed', handleSettingsChange);
     
-    // Check if onboarding is complete with a safety timeout
     const checkOnboarding = () => {
         try {
             const onboardingComplete = getLocalStorageItem('onboardingCompleted', false);
@@ -85,16 +79,14 @@ const App: React.FC = () => {
             }
         } catch (e) {
             console.error("Error checking onboarding state:", e);
-            setOnboardingState('welcome'); // Fallback
+            setOnboardingState('welcome');
         }
     };
 
     checkOnboarding();
 
-    // Safety timeout: if still checking after 2 seconds, force it to open
     const safetyTimer = setTimeout(() => {
         if (onboardingState === 'checking') {
-            console.warn("Onboarding check timed out, forcing load.");
             setOnboardingState('complete');
         }
     }, 2000);
@@ -122,7 +114,6 @@ const App: React.FC = () => {
     { id: 'progress', title: 'Progress', description: 'Review your weekly trends', Icon: ProgressIcon, component: <Progress /> },
   ];
 
-  // Robust screen finding
   const activeMenuItem = menuItems.find(item => item.id === screen);
   
   const screenTitleMap: { [key: string]: string | undefined } = {
@@ -151,7 +142,6 @@ const App: React.FC = () => {
     );
   }
 
-  // WelcomeScreen is NOT suspended now
   if (onboardingState === 'welcome') {
     return <WelcomeScreen onComplete={() => setOnboardingState('profileSetup')} />;
   }
@@ -196,12 +186,10 @@ const App: React.FC = () => {
               );
         }
     
-        // Fallback for defined menu items
         if (activeMenuItem) {
             return activeMenuItem.component;
         }
     
-        // Final Fallback if screen ID is unknown
         return (
             <div className="text-center p-10">
                 <p className="text-textSecondary">Screen not found.</p>
@@ -213,7 +201,6 @@ const App: React.FC = () => {
         return <div className="p-4 text-red-600">Error rendering this screen. Please return Home.</div>;
     }
   };
-
 
   return (
     <div className="bg-creamBg max-w-[430px] mx-auto min-h-screen flex flex-col font-sans text-textPrimary leading-relaxed shadow-2xl">
@@ -230,7 +217,5 @@ const App: React.FC = () => {
     </div>
   );
 };
-
-export default App;
 
 export default App;
