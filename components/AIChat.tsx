@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { getLocalStorageItem, markdownToHtml } from './utils';
 
-// Define global constant from vite config
 declare const __API_KEY__: string;
 
 const AI_COACH_SYSTEM_PROMPT = `IDENTITY & ROLE
@@ -62,7 +61,6 @@ interface AICoachProps {
   clearInitialPrompt?: () => void;
 }
 
-// Map settings keys to the full quick action text
 const quickActionMap = {
   checkin: 'Daily Check-In',
   plan3d: '3-Day DASH Plan (~1,800 mg sodium/day)',
@@ -97,7 +95,7 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
       setActiveQuickActions(enabledActions);
     };
     
-    updateQuickActions(); // Initial load
+    updateQuickActions();
     window.addEventListener('settings-changed', updateQuickActions);
 
     return () => {
@@ -148,7 +146,6 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
     let success = false;
 
     try {
-        // --- Build Comprehensive Context ---
         const profile = {
             name: getLocalStorageItem('profile.name', ''),
             age: getLocalStorageItem('profile.age', ''),
@@ -197,8 +194,7 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
 
         const personalizedSystemPrompt = AI_COACH_SYSTEM_PROMPT + contextString;
 
-        // Initialize using the global constant __API_KEY__
-        // DO NOT use process.env here
+        // USA LA CHIAVE SICURA
         const ai = new GoogleGenAI({ apiKey: __API_KEY__ });
         
         let response: GenerateContentResponse | undefined;
@@ -213,7 +209,7 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
                 
                 response = await chat.sendMessage({ message: messageText });
                 if (response && response.text) {
-                    break; // Success
+                    break;
                 }
             } catch (e) {
                 console.warn(`Model ${modelName} failed:`, e);
@@ -260,7 +256,7 @@ const AICoach: React.FC<AICoachProps> = ({ initialPrompt, clearInitialPrompt }) 
     const success = await sendMessage(messageToSend);
     
     if (!success) {
-        setInput(messageToSend); // Restore on failure
+        setInput(messageToSend);
     }
   };
 
